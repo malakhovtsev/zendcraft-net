@@ -13,10 +13,10 @@ export default function Header() {
     : currentPath;
 
   const backgroundImages: Record<string, string> = {
-    '/': 'url("/header-images/home.jpg")',
-    '/bedrock': 'url("/header-images/bedrock.png")',
-    '/java-og': 'url("/header-images/java-og.png")',
-    '/java': 'url("/header-images/java-creative.png")',
+    '/': 'url("/header-images/home.webp")',
+    '/bedrock': 'url("/header-images/bedrock.webp")',
+    '/java-og': 'url("/header-images/java-og.webp")',
+    '/java': 'url("/header-images/java-creative.webp")',
   };
 
   const backgroundImage = backgroundImages[cleanPathname] || 'url("/header-images/logo.png")';
