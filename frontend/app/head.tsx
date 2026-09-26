@@ -9,7 +9,7 @@ export default function Head() {
       {/* Open Graph tags */}
       <meta property="og:title" content="ZendCraft.net" />
       <meta property="og:description" content="Your neighborhood Minecraft Bedrock and Java Servers for Whitelisted friends." />
-      <meta property="og:image" content="https://zendcraft.net/social-preview.png" />
+      <meta property="og:image" content="https://zendcraft.net/social-preview.jpg" />
       <meta property="og:url" content="https://zendcraft.net" />
       <meta property="og:type" content="website" />
 
