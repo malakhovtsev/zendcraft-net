@@ -1,12 +1,29 @@
 .header {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-size: 16px;
+  color: white;
+  text-shadow: 2px 2px 4px #000;
+}
+
+.headerBg {
+  position: absolute;
+  top: -120px;
+  left: 0;
+  right: 0;
+  bottom: -120px;
   background-image: url('/header-images/home.webp');
   background-size: cover;
   background-position: center;
-  font-size: 16px;
-  color: white;
+  will-change: transform;
+}
+
+.headerContent {
+  position: relative;
+  z-index: 1;
   padding: 3rem 1rem;
   text-align: center;
-  text-shadow: 2px 2px 4px #000;
 }
 
 .titleImage {
@@ -61,7 +78,7 @@
 
 /* Phone Support */
 @media (max-width: 500px) {
-  .header {
+  .headerContent {
     padding: 2rem 0.5rem;
     text-align: center;
   }

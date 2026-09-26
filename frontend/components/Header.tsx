@@ -2,14 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import styles from './Header.module.css';
 
 export default function Header() {
   const pathname = usePathname();
   const currentPath = pathname || '/';
-  
-  const cleanPathname = currentPath.endsWith('/') && currentPath !== '/' 
-    ? currentPath.slice(0, -1) 
+  const bgRef = useRef<HTMLDivElement>(null);
+
+  const cleanPathname = currentPath.endsWith('/') && currentPath !== '/'
+    ? currentPath.slice(0, -1)
     : currentPath;
 
   const backgroundImages: Record<string, string> = {
@@ -21,35 +23,58 @@ export default function Header() {
 
   const backgroundImage = backgroundImages[cleanPathname] || 'url("/header-images/logo.png")';
 
-  return (
-    <header
-      className={styles.header}
-      style={{ backgroundImage, backgroundSize: 'cover', backgroundPosition: 'center' }}
-    >
-      <Link href="/" className={styles.titleImageLink}>
-        <img src="/header-images/logo.png" alt="ZendCraft.net" className={styles.titleImage} />
-      </Link>
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
 
-      <nav className={styles.nav}>
-        <Link
-          href="/java-og"
-          className={`${styles.navLink} ${cleanPathname === '/java-og' ? styles.navLinkActive : ''}`}
-        >
-          Classic
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        if (bgRef.current) {
+          bgRef.current.style.transform = `translate3d(0, ${document.body.scrollTop * 0.35}px, 0)`;
+        }
+        ticking = false;
+      });
+    };
+
+    document.body.addEventListener('scroll', handleScroll, { passive: true });
+    return () => document.body.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <header className={styles.header}>
+      <div ref={bgRef} className={styles.headerBg} style={{ backgroundImage }} />
+
+      <div className={styles.headerContent}>
+        <Link href="/" className={styles.titleImageLink}>
+          <img src="/header-images/logo.png" alt="ZendCraft.net" className={styles.titleImage} />
         </Link>
-        <Link
-          href="/java"
-          className={`${styles.navLink} ${cleanPathname === '/java' ? styles.navLinkActive : ''}`}
-        >
-          Creative
-        </Link>
-        <Link
-          href="/bedrock"
-          className={`${styles.navLink} ${cleanPathname === '/bedrock' ? styles.navLinkActive : ''}`}
-        >
-          Bedrock
-        </Link>
-      </nav>
+
+        <nav className={styles.nav}>
+          <Link
+            href="/java-og"
+            className={`${styles.navLink} ${cleanPathname === '/java-og' ? styles.navLinkActive : ''}`}
+          >
+            Classic
+          </Link>
+          <Link
+            href="/java"
+            className={`${styles.navLink} ${cleanPathname === '/java' ? styles.navLinkActive : ''}`}
+          >
+            Creative
+          </Link>
+          <Link
+            href="/bedrock"
+            className={`${styles.navLink} ${cleanPathname === '/bedrock' ? styles.navLinkActive : ''}`}
+          >
+            Bedrock
+          </Link>
+        </nav>
+      </div>
     </header>
   );
 }
