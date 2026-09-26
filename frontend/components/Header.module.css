@@ -18,24 +18,45 @@
 }
 
 .nav {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .navLink {
-  margin: 0 1rem;
-  color: white;
-  text-decoration: none;
+  display: inline-block;
+  padding: 0.85rem 1.75rem;
+  background: #707070;
+  color: #ffffff;
   font-weight: normal;
-  transition: color 0.3s ease;
+  text-decoration: none;
+  text-shadow: 2px 2px 0 #3b3b3b;
+  box-shadow:
+    inset 2px 2px 0 #a3a3a3,
+    inset -2px -2px 0 #232323,
+    0 0 0 2px #000;
+  transition: background 0.08s ease, transform 0.08s ease;
 }
 
 .navLink:hover {
-  text-decoration: underline;
+  background: #8a8a8a;
+  color: #ffffa0;
+  cursor: pointer;
+}
+
+.navLink:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset -2px -2px 0 #a3a3a3,
+    inset 2px 2px 0 #232323,
+    0 0 0 2px #000;
 }
 
 .navLinkActive {
-  color: #ffd700;
-  font-weight: bold;
+  background: #8a8a8a;
+  color: #ffffa0;
 }
 
 /* Phone Support */
@@ -50,8 +71,7 @@
   }
 
   .navLink {
-    margin: 0.5rem;
-    margin-top: 0;
+    padding: 0.65rem 1.15rem;
     font-size: 0.9rem;
   }
 }
