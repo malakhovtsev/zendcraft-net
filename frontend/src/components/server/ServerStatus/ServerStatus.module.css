@@ -1,10 +1,10 @@
-.status-group {
+.statusGroup {
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
-.lamp-icon {
+.lampIcon {
   width: 19px;
   height: 19px;
   display: inline-block;
@@ -12,17 +12,16 @@
   position: relative;
 }
 
-.status-text {
+.statusText {
   font-weight: bold;
   font-size: 17px;
 }
 
-.status-text.online {
+.statusText.online {
   color: yellowgreen;
 }
 
-.status-text.offline,
-.pause-reason,
-.status-text.loading {
+.statusText.offline,
+.statusText.loading {
   color: darkorange;
 }

@@ -1,10 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-
-import YouTubeShorts from '../../components/YouTubeShorts';
-import Flag from '../../components/Flag';
-import '../ReasonButtons.css';
+import YouTubeShorts from '@/components/media/YouTubeShorts/YouTubeShorts';
+import Flag from '@/components/server/Flag/Flag';
 
 export default function JavaPage() {
   return (

@@ -1,16 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Flag from '../../components/Flag';
-import ServerStatus from '../../components/ServerStatus';
-import '../ReasonButtons.css';
+import { useState, useEffect } from 'react';
+import Flag from '@/components/server/Flag/Flag';
+import ServerStatus, { ServerStatusData } from '@/components/server/ServerStatus/ServerStatus';
+import styles from '../serverPage.module.css';
 
-type ServerStatusData = {
-  online: boolean;
-  playerCount: number;
-};
-
-export default function JavaPage() {
+export default function JavaOgPage() {
   const [status, setStatus] = useState<ServerStatusData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showReason, setShowReason] = useState(false);
@@ -35,7 +30,7 @@ export default function JavaPage() {
   }, []);
 
   return (
-    <main className="server-main">
+    <main className={styles.serverMain}>
       <h2>Java Edition: OG Survival</h2>
       <br />
 
@@ -43,7 +38,7 @@ export default function JavaPage() {
         This is the main{' '}
         <a
           href="#"
-          className="reason-link"
+          className={styles.reasonLink}
           onClick={(e) => {
             e.preventDefault();
             setShowReason((prev) => !prev);
@@ -68,7 +63,7 @@ export default function JavaPage() {
       <br />
 
       {showReason && (
-        <p id="server-reason" className="server-reason">
+        <p id="server-reason" className={styles.serverReason}>
           <u>Reason</u>: Was selected to be one of the first and most nostalgic versions among most friends.
         </p>
       )}

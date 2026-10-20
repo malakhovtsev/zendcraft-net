@@ -1,17 +1,21 @@
-.server-main {
+.serverMain {
   padding: 2rem;
   text-align: center;
 }
 
-.server-reason {
+.serverReason {
   margin-top: 1rem;
   transition: opacity 0.3s ease-in-out;
   animation: fadeIn 0.3s ease forwards;
   text-shadow: inherit;
 }
 
-a.reason-link {
+a.reasonLink {
   color: var(--bold);
+}
+
+.pauseReason {
+  color: darkorange;
 }
 
 @keyframes fadeIn {

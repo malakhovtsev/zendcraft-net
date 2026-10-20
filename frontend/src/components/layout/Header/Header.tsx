@@ -50,7 +50,7 @@ export default function Header() {
       <div ref={bgRef} className={styles.headerBg} style={{ backgroundImage }} />
 
       <div className={styles.headerContent}>
-        <Link href="/" className={styles.titleImageLink}>
+        <Link href="/">
           <img src="/header-images/logo.png" alt="ZendCraft.net" className={styles.titleImage} />
         </Link>
 

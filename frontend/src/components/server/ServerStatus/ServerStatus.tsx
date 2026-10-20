@@ -1,23 +1,24 @@
-import React from 'react'
-import './ServerStatus.css'
+import styles from './ServerStatus.module.css'
+
+export interface ServerStatusData {
+  online: boolean
+  playerCount: number
+  paused?: boolean
+}
 
 interface ServerStatusProps {
   loading: boolean
-  status?: {
-    online: boolean
-    playerCount: number
-    paused?: boolean
-  }
+  status?: ServerStatusData | null
   showPlayers?: boolean
 }
 
-const ServerStatus: React.FC<ServerStatusProps> = ({ loading, status, showPlayers = true }) => {
+const ServerStatus = ({ loading, status, showPlayers = true }: ServerStatusProps) => {
   if (loading) {
     return (
-      <p className="server-status">
+      <p>
         Status:{' '}
-        <span className="status-group">
-          <span className="status-text loading">Loading...</span>
+        <span className={styles.statusGroup}>
+          <span className={`${styles.statusText} ${styles.loading}`}>Loading...</span>
         </span>
       </p>
     )
@@ -28,29 +29,27 @@ const ServerStatus: React.FC<ServerStatusProps> = ({ loading, status, showPlayer
   const playerCount = status?.playerCount ?? 0
 
   let statusText = 'Offline'
-  let statusClass = 'offline'
+  let statusClass = styles.offline
   let lampIcon = '/lamp-off.png'
   let lampAlt = 'Offline'
 
   if (isPaused) {
     statusText = 'Paused'
-    statusClass = 'offline'
-    lampIcon = '/lamp-off.png'
     lampAlt = 'Paused'
   } else if (isOnline) {
     statusText = 'Online'
-    statusClass = 'online'
+    statusClass = styles.online
     lampIcon = '/lamp-on.png'
     lampAlt = 'Online'
   }
 
   return (
-    <p className="server-status">
+    <p>
       Status:{' '}
-      <span className="status-group">
-        <span className={`status-text ${statusClass}`}>{statusText}</span>
+      <span className={styles.statusGroup}>
+        <span className={`${styles.statusText} ${statusClass}`}>{statusText}</span>
         <img
-          className="lamp-icon"
+          className={styles.lampIcon}
           src={lampIcon}
           alt={lampAlt}
         />
@@ -60,12 +59,12 @@ const ServerStatus: React.FC<ServerStatusProps> = ({ loading, status, showPlayer
         <>
           <br />
           Players online:{' '}
-          <span className="status-group">
-            <span className={`status-text ${playerCount > 0 ? 'online' : 'offline'}`}>
+          <span className={styles.statusGroup}>
+            <span className={`${styles.statusText} ${playerCount > 0 ? styles.online : styles.offline}`}>
               {playerCount}
             </span>
             <img
-              className="lamp-icon"
+              className={styles.lampIcon}
               src={playerCount > 0 ? '/lamp-on.png' : '/lamp-off.png'}
               alt={playerCount > 0 ? 'Players online' : 'No players online'}
             />
