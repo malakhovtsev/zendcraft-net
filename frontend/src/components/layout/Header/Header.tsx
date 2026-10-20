@@ -15,13 +15,13 @@ export default function Header() {
     : currentPath;
 
   const backgroundImages: Record<string, string> = {
-    '/': 'url("/header-images/home.webp")',
-    '/bedrock': 'url("/header-images/bedrock.webp")',
-    '/java-og': 'url("/header-images/java-og.webp")',
-    '/java': 'url("/header-images/java-creative.webp")',
+    '/': 'url("/images/header/home.webp")',
+    '/bedrock': 'url("/images/header/bedrock.webp")',
+    '/java-og': 'url("/images/header/java-og.webp")',
+    '/java': 'url("/images/header/java-creative.webp")',
   };
 
-  const backgroundImage = backgroundImages[cleanPathname] || 'url("/header-images/logo.png")';
+  const backgroundImage = backgroundImages[cleanPathname] || 'url("/images/header/logo.png")';
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -51,7 +51,7 @@ export default function Header() {
 
       <div className={styles.headerContent}>
         <Link href="/">
-          <img src="/header-images/logo.png" alt="ZendCraft.net" className={styles.titleImage} />
+          <img src="/images/header/logo.png" alt="ZendCraft.net" className={styles.titleImage} />
         </Link>
 
         <nav className={styles.nav}>

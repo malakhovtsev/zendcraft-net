@@ -30,7 +30,7 @@ const ServerStatus = ({ loading, status, showPlayers = true }: ServerStatusProps
 
   let statusText = 'Offline'
   let statusClass = styles.offline
-  let lampIcon = '/lamp-off.png'
+  let lampIcon = '/images/status/lamp-off.png'
   let lampAlt = 'Offline'
 
   if (isPaused) {
@@ -39,7 +39,7 @@ const ServerStatus = ({ loading, status, showPlayers = true }: ServerStatusProps
   } else if (isOnline) {
     statusText = 'Online'
     statusClass = styles.online
-    lampIcon = '/lamp-on.png'
+    lampIcon = '/images/status/lamp-on.png'
     lampAlt = 'Online'
   }
 
@@ -65,7 +65,7 @@ const ServerStatus = ({ loading, status, showPlayers = true }: ServerStatusProps
             </span>
             <img
               className={styles.lampIcon}
-              src={playerCount > 0 ? '/lamp-on.png' : '/lamp-off.png'}
+              src={playerCount > 0 ? '/images/status/lamp-on.png' : '/images/status/lamp-off.png'}
               alt={playerCount > 0 ? 'Players online' : 'No players online'}
             />
           </span>
