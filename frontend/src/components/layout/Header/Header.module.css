@@ -13,7 +13,7 @@
   left: 0;
   right: 0;
   bottom: -120px;
-  background-image: url('/header-images/home.webp');
+  background-image: url('/images/header/home.webp');
   background-size: cover;
   background-position: center;
   will-change: transform;

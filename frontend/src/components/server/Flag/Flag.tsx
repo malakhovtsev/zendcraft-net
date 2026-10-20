@@ -15,8 +15,8 @@ function FlagBase({ src, alt }: { src: string; alt: string }) {
 }
 
 const Flag = {
-  DE: () => <FlagBase src="/de-flag-minecraft.png" alt="🇩🇪" />,
-  US: () => <FlagBase src="/us-flag-minecraft.png" alt="🇺🇸" />,
+  DE: () => <FlagBase src="/images/flags/de.png" alt="🇩🇪" />,
+  US: () => <FlagBase src="/images/flags/us.png" alt="🇺🇸" />,
 };
 
 export default Flag;
