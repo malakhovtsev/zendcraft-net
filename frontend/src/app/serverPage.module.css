@@ -14,10 +14,6 @@ a.reasonLink {
   color: var(--bold);
 }
 
-.pauseReason {
-  color: darkorange;
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;

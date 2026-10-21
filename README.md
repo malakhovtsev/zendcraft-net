@@ -11,17 +11,7 @@
 <img width="429" height="233" alt="image" src="https://github.com/user-attachments/assets/60550b44-1142-4fe8-9fef-ecbb3966acfb" />
 
 * **Java Edition:** Creative Mode (In-Progress).
-* **Bedrock Edition:** Survival Mode (Currently Paused, Fully working logic).
-
----
-
-## Scripts (Linux game servers)
-
-Shell automation for **production hosts** (not run via `npm` in this repo) lives under [`server/linux/`](server/linux/). Copy scripts to the server, `chmod +x`, and run there.
-
-| Path | Purpose |
-|------|---------|
-| [`server/linux/bedrock/update_bedrock.sh`](server/linux/bedrock/update_bedrock.sh) | Back up config/worlds, fetch the latest Bedrock Dedicated Server for Linux, unzip in place, restore `server.properties`. Optional: `BEDROCK_DIR=/path/to/server ./update_bedrock.sh` |
+* **Bedrock Edition:** Survival on a Minecraft Realm.
 
 ---
 
