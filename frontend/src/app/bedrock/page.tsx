@@ -46,12 +46,6 @@ export default function BedrockPage() {
         </p>
       )}
 
-      <p className={styles.pauseReason}>
-        <br />
-        Reason for pause: Switched to Realm and moved server computer resources<br></br>
-         for <b>CREATIVE</b> server. All the logic is being left for future revival.
-      </p>
-
       <br />
     </main>
   );

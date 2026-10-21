@@ -14,8 +14,3 @@ export const javaServer = {
   host: process.env.JAVA_SERVER_HOST || 'localhost',
   port: parseInt(process.env.JAVA_SERVER_PORT || '25565'),
 };
-
-export const bedrockServer = {
-  host: process.env.BEDROCK_SERVER_HOST || 'localhost',
-  port: parseInt(process.env.BEDROCK_SERVER_PORT || '19132'),
-};
