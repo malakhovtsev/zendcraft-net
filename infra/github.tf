@@ -63,6 +63,21 @@ data "aws_iam_policy_document" "github_deploy" {
     actions   = ["s3:PutObject"]
     resources = ["${aws_s3_bucket.deploy_artifacts.arn}/backend/*"]
   }
+
+  statement {
+    sid     = "RunBackendDeployScript"
+    actions = ["ssm:SendCommand"]
+    resources = [
+      aws_ssm_document.deploy_backend.arn,
+      aws_instance.backend.arn,
+    ]
+  }
+
+  statement {
+    sid       = "ReadDeployResult"
+    actions   = ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations"]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_role_policy" "github_deploy" {
