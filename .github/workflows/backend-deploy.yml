@@ -8,37 +8,63 @@ on:
       - 'backend/**'
       - '.github/workflows/backend-deploy.yml'
 
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: backend-deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-2
+  DEPLOY_ROLE_ARN: arn:aws:iam::476287788555:role/zendcraft-github-deploy
+  ARTIFACTS_BUCKET: zendcraft-deploy-artifacts-476287788555
+  INSTANCE_ID: i-0cf04dcdd635c4d73
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Create version.txt with current commit SHA
-        run: echo "${{ github.sha }}" > ./backend/version.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Make SSH directory
-        run: mkdir -p $HOME/.ssh
-
-      - name: Add SSH private key
-        run: echo "${{ secrets.EC2_SSH_KEY }}" > $HOME/.ssh/id_rsa
-
-      - name: Fix SSH key permissions
-        run: chmod 600 $HOME/.ssh/id_rsa
-
-      - name: Add EC2 host to known_hosts
-        run: ssh-keyscan -H ${{ secrets.EC2_HOST }} >> $HOME/.ssh/known_hosts
-
-      - name: Deploy backend to EC2
+      - name: Build
+        working-directory: backend
         run: |
-          rsync -avz --exclude='.env' -e "ssh -i $HOME/.ssh/id_rsa" ./backend/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/backend/
-          ssh -i $HOME/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            set -e
-            cd ~/backend
-            npm install --omit=dev
-            npm run build
-            pm2 delete backend || true
-            pm2 start npm --name backend -- start
-          EOF
+          npm ci
+          npm run build
+          echo "${{ github.sha }}" > version.txt
+          tar -czf "../backend-${{ github.sha }}.tar.gz" dist package.json package-lock.json version.txt
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload build
+        run: aws s3 cp "backend-${{ github.sha }}.tar.gz" "s3://${ARTIFACTS_BUCKET}/backend/${{ github.sha }}.tar.gz"
+
+      - name: Install build on the instance
+        run: |
+          command_id=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name zendcraft-deploy-backend \
+            --parameters "ArtifactKey=backend/${{ github.sha }}.tar.gz" \
+            --comment "Deploy ${{ github.sha }}" \
+            --query Command.CommandId --output text)
+
+          aws ssm wait command-executed --command-id "$command_id" --instance-id "$INSTANCE_ID" || true
+
+          aws ssm get-command-invocation --command-id "$command_id" --instance-id "$INSTANCE_ID" \
+            --query '[Status, StandardOutputContent, StandardErrorContent]' --output text
+
+          status=$(aws ssm get-command-invocation --command-id "$command_id" --instance-id "$INSTANCE_ID" \
+            --query Status --output text)
+          test "$status" = "Success"
