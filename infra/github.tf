@@ -1,5 +1,7 @@
 locals {
-  github_repo = "malakhovtsev/zendcraft-net"
+  # GitHub's OIDC subject includes the immutable owner and repo IDs, so a
+  # renamed or recreated repo with the same name can't assume the role.
+  github_repo = "malakhovtsev@111363234/zendcraft-net@1008671579"
 }
 
 data "aws_caller_identity" "current" {}
