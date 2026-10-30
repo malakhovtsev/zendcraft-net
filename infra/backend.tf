@@ -47,9 +47,9 @@ resource "aws_iam_instance_profile" "backend" {
   role = aws_iam_role.backend.name
 }
 
-resource "aws_iam_role_policy_attachment" "backend_ssm_readonly" {
+resource "aws_iam_role_policy_attachment" "backend_ssm_core" {
   role       = aws_iam_role.backend.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
 resource "aws_security_group" "backend" {
@@ -88,14 +88,6 @@ resource "aws_vpc_security_group_ingress_rule" "ssh_home" {
   from_port         = 22
   to_port           = 22
   cidr_ipv4         = "184.57.177.67/32"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "express_direct" {
-  security_group_id = aws_security_group.backend.id
-  ip_protocol       = "tcp"
-  from_port         = 3000
-  to_port           = 3000
-  cidr_ipv4         = "0.0.0.0/0"
 }
 
 resource "aws_vpc_security_group_egress_rule" "all" {
