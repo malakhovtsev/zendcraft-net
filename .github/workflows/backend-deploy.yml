@@ -6,8 +6,9 @@ on:
       - main
     paths:
       - 'backend/**'
+      - 'nginx/**'
+      - 'compose.yaml'
       - '.github/workflows/backend-deploy.yml'
-      - '.nvmrc'
 
 permissions:
   id-token: write
@@ -22,6 +23,7 @@ env:
   DEPLOY_ROLE_ARN: arn:aws:iam::476287788555:role/zendcraft-github-deploy
   ARTIFACTS_BUCKET: zendcraft-deploy-artifacts-476287788555
   INSTANCE_ID: i-0cf04dcdd635c4d73
+  IMAGE_REPOSITORY: zendcraft-api
 
 jobs:
   deploy:
@@ -30,29 +32,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Build
-        working-directory: backend
-        run: |
-          npm ci
-          npm run build
-          echo "${{ github.sha }}" > version.txt
-          tar -czf "../backend-${{ github.sha }}.tar.gz" dist package.json package-lock.json version.txt
-
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Upload build
-        run: aws s3 cp "backend-${{ github.sha }}.tar.gz" "s3://${ARTIFACTS_BUCKET}/backend/${{ github.sha }}.tar.gz"
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Install build on the instance
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and push the API image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          push: true
+          tags: ${{ steps.ecr.outputs.registry }}/${{ env.IMAGE_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: Upload release bundle
+        run: |
+          tar -czf release.tar.gz compose.yaml nginx
+          aws s3 cp release.tar.gz "s3://${ARTIFACTS_BUCKET}/backend/${{ github.sha }}.tar.gz"
+
+      - name: Start the release on the instance
         run: |
           command_id=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \

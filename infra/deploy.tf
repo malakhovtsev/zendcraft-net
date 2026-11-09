@@ -1,5 +1,6 @@
-# The only command CI may run on the backend: install a build from the
-# artifacts bucket, restart pm2, and roll back if the API stops answering.
+# The only command CI may run on the backend: start a release (API image from
+# ECR plus the compose/nginx bundle from S3), and roll back if the API stops
+# answering through nginx.
 resource "aws_ssm_document" "deploy_backend" {
   name            = "zendcraft-deploy-backend"
   document_type   = "Command"
@@ -7,11 +8,11 @@ resource "aws_ssm_document" "deploy_backend" {
 
   content = <<-YAML
     schemaVersion: "2.2"
-    description: Deploy a zendcraft backend build from S3 and restart pm2.
+    description: Deploy a zendcraft backend release with Docker Compose.
     parameters:
       ArtifactKey:
         type: String
-        description: Object key of the build archive, e.g. backend/<commit sha>.tar.gz
+        description: Object key of the release bundle, e.g. backend/<commit sha>.tar.gz
         allowedPattern: "^backend/[0-9a-f]{40}\\.tar\\.gz$"
     mainSteps:
       - action: aws:runShellScript
@@ -21,51 +22,62 @@ resource "aws_ssm_document" "deploy_backend" {
           runCommand:
             - |
               set -euo pipefail
-              APP=/home/ec2-user/backend
+              export HOME=/root
+              APP=/opt/zendcraft
+              KEY="{{ ArtifactKey }}"
+              SHA=$(basename "$KEY" .tar.gz)
+              export API_IMAGE="${aws_ecr_repository.api.repository_url}:$SHA"
               WORK=$(mktemp -d)
               trap 'rm -rf "$WORK"' EXIT
 
-              aws s3 cp "s3://${aws_s3_bucket.deploy_artifacts.bucket}/{{ ArtifactKey }}" "$WORK/build.tar.gz" --region ${data.aws_region.current.region}
-              mkdir "$WORK/build"
-              tar -xzf "$WORK/build.tar.gz" -C "$WORK/build"
+              aws s3 cp "s3://${aws_s3_bucket.deploy_artifacts.bucket}/$KEY" "$WORK/bundle.tar.gz" --region ${data.aws_region.current.region}
+              mkdir "$WORK/bundle"
+              tar -xzf "$WORK/bundle.tar.gz" -C "$WORK/bundle"
 
-              rm -rf "$APP/dist.previous" "$APP/package.previous.json" "$APP/package-lock.previous.json"
-              cp -a "$APP/dist" "$APP/dist.previous"
-              cp -a "$APP/package.json" "$APP/package.previous.json"
-              cp -a "$APP/package-lock.json" "$APP/package-lock.previous.json"
+              aws ecr get-login-password --region ${data.aws_region.current.region} \
+                | docker login --username AWS --password-stdin "${split("/", aws_ecr_repository.api.repository_url)[0]}"
 
-              rm -rf "$APP/dist"
-              cp -a "$WORK/build/dist" "$APP/dist"
-              cp "$WORK/build/package.json" "$WORK/build/package-lock.json" "$WORK/build/version.txt" "$APP/"
-              chown -R ec2-user:ec2-user "$APP"
+              # Copy files in place rather than replacing them: nginx bind-mounts
+              # its config, and a new inode wouldn't be seen by the container.
+              install_files() {
+                cp "$1/compose.yaml" "$APP/compose.yaml"
+                mkdir -p "$APP/nginx"
+                cp -r "$1/nginx/." "$APP/nginx/"
+              }
 
-              run_as_app() { sudo -u ec2-user -i bash -c "cd $APP && $1"; }
+              up() {
+                docker compose --project-directory "$APP" up -d --no-build --wait --wait-timeout 90 \
+                  && docker compose --project-directory "$APP" exec -T nginx nginx -s reload
+              }
 
-              # A real status response, online or not; the game server being
-              # down shouldn't fail a deploy.
               healthy() {
-                for _ in $(seq 1 15); do
-                  if curl -fs http://localhost:3000/api/java-server-status | grep -q '"online":'; then return 0; fi
+                for _ in $(seq 1 10); do
+                  if curl -fs http://127.0.0.1/api/java-server-status | grep -q '"online":'; then return 0; fi
                   sleep 2
                 done
                 return 1
               }
 
-              if run_as_app "npm ci --omit=dev --no-audit --no-fund" \
-                && run_as_app "pm2 restart backend --update-env" \
-                && healthy; then
-                run_as_app "pm2 save"
-                echo "Deployed $(cat "$APP/version.txt")"
+              PREVIOUS_IMAGE=$(cat "$APP/image" 2>/dev/null || true)
+              rm -rf "$APP/previous"
+              mkdir -p "$APP/previous"
+              if [ -f "$APP/compose.yaml" ]; then
+                cp -r "$APP/compose.yaml" "$APP/nginx" "$APP/previous/"
+              fi
+
+              install_files "$WORK/bundle"
+              if docker compose --project-directory "$APP" pull --quiet && up && healthy; then
+                echo "$API_IMAGE" > "$APP/image"
+                docker image prune -af > /dev/null
+                echo "Deployed $SHA"
                 exit 0
               fi
 
               echo "Deploy failed health check; rolling back" >&2
-              rm -rf "$APP/dist"
-              mv "$APP/dist.previous" "$APP/dist"
-              mv "$APP/package.previous.json" "$APP/package.json"
-              mv "$APP/package-lock.previous.json" "$APP/package-lock.json"
-              run_as_app "npm ci --omit=dev --no-audit --no-fund"
-              run_as_app "pm2 restart backend --update-env"
+              if [ -n "$PREVIOUS_IMAGE" ]; then
+                install_files "$APP/previous"
+                API_IMAGE="$PREVIOUS_IMAGE" up
+              fi
               exit 1
   YAML
 }
