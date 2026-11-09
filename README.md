@@ -41,7 +41,7 @@ browser ─ HTTPS ─ CloudFront
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 * **Frontend:** [Next.js](https://nextjs.org/) (App Router, static export)
 * **API Backend:** [Node.js](https://nodejs.org/) 24 & [Express](https://expressjs.com/)
 * **Language:** [TypeScript](https://www.typescriptlang.org/)
