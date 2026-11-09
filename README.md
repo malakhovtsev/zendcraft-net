@@ -41,7 +41,7 @@ browser ─ HTTPS ─ CloudFront
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 * **Frontend:** [Next.js](https://nextjs.org/) (App Router, static export)
 * **API Backend:** [Node.js](https://nodejs.org/) 24 & [Express](https://expressjs.com/)
 * **Language:** [TypeScript](https://www.typescriptlang.org/)
@@ -71,6 +71,6 @@ docker compose up --build   # http://localhost/api/java-server-status
 
 ## License
 
-Copyright © 2025–2026 Andrii Malakhovtsev. All rights reserved. The source is public for viewing and reference only; see [LICENSE](LICENSE).
+Copyright © 2025 Andrii Malakhovtsev. All rights reserved. The source is public for viewing and reference only; see [LICENSE](LICENSE).
 
 Not affiliated with Mojang or Microsoft. Minecraft is a trademark of Mojang AB.
