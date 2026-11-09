@@ -36,6 +36,7 @@ browser ─ HTTPS ─ CloudFront
 * **CI/CD:** GitHub Actions deploy on every push to `main`, authenticating to AWS through OIDC with short-lived credentials (no stored access keys).
   * **Frontend:** build, sync to S3 (hashed assets cached for a year, pages revalidated), invalidate CloudFront.
   * **Backend:** build once in CI, upload the artifact to S3, then install it on the instance through an SSM Run Command document that health-checks the API and rolls back on failure.
+* **Pull requests:** CI builds and type-checks both apps and validates the Terraform before merge.
 * **Server access:** AWS Systems Manager Session Manager only.
 
 ---

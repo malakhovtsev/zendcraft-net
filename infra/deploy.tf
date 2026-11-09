@@ -41,9 +41,11 @@ resource "aws_ssm_document" "deploy_backend" {
 
               run_as_app() { sudo -u ec2-user -i bash -c "cd $APP && $1"; }
 
+              # A real status response, online or not; the game server being
+              # down shouldn't fail a deploy.
               healthy() {
                 for _ in $(seq 1 15); do
-                  if curl -fsS -o /dev/null http://localhost:3000/api/java-server-status; then return 0; fi
+                  if curl -fs http://localhost:3000/api/java-server-status | grep -q '"online":'; then return 0; fi
                   sleep 2
                 done
                 return 1
