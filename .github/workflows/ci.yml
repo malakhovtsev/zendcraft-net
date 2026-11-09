@@ -30,6 +30,9 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+      - run: docker build .
+      - run: docker compose config --quiet
+        working-directory: .
 
   frontend:
     runs-on: ubuntu-latest
