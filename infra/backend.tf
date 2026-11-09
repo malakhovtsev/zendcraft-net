@@ -58,20 +58,18 @@ resource "aws_security_group" "backend" {
   vpc_id      = "vpc-01b893caede99cf38"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "http" {
+# AWS-maintained list of the addresses CloudFront uses to reach origins.
+data "aws_ec2_managed_prefix_list" "cloudfront" {
+  name = "com.amazonaws.global.cloudfront.origin-facing"
+}
+
+# Only CloudFront may reach nginx; everything else is closed.
+resource "aws_vpc_security_group_ingress_rule" "http_from_cloudfront" {
   security_group_id = aws_security_group.backend.id
   ip_protocol       = "tcp"
   from_port         = 80
   to_port           = 80
-  cidr_ipv4         = "0.0.0.0/0"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "https" {
-  security_group_id = aws_security_group.backend.id
-  ip_protocol       = "tcp"
-  from_port         = 443
-  to_port           = 443
-  cidr_ipv4         = "0.0.0.0/0"
+  prefix_list_id    = data.aws_ec2_managed_prefix_list.cloudfront.id
 }
 
 resource "aws_vpc_security_group_egress_rule" "all" {
