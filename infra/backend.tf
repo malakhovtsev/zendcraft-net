@@ -74,24 +74,9 @@ resource "aws_vpc_security_group_ingress_rule" "https" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
-resource "aws_vpc_security_group_ingress_rule" "ssh_anywhere" {
-  security_group_id = aws_security_group.backend.id
-  ip_protocol       = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_ipv4         = "0.0.0.0/0"
-}
-
-resource "aws_vpc_security_group_ingress_rule" "ssh_home" {
-  security_group_id = aws_security_group.backend.id
-  ip_protocol       = "tcp"
-  from_port         = 22
-  to_port           = 22
-  cidr_ipv4         = "184.57.177.67/32"
-}
-
 resource "aws_vpc_security_group_egress_rule" "all" {
   security_group_id = aws_security_group.backend.id
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
+
