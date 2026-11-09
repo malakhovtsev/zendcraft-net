@@ -9,8 +9,19 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
+data "aws_cloudfront_cache_policy" "caching_disabled" {
+  name = "Managed-CachingDisabled"
+}
+
+# Forwards query strings and viewer headers, but not Host, so nginx sees the
+# origin's own hostname instead of zendcraft.net.
+data "aws_cloudfront_origin_request_policy" "all_viewer_except_host" {
+  name = "Managed-AllViewerExceptHostHeader"
+}
+
 locals {
-  s3_origin_id = "zendcraft.net.s3.amazonaws.com-mccu8k6t8r9"
+  s3_origin_id      = "zendcraft.net.s3.amazonaws.com-mccu8k6t8r9"
+  backend_origin_id = "backend"
 }
 
 resource "aws_cloudfront_distribution" "site" {
@@ -35,6 +46,30 @@ resource "aws_cloudfront_distribution" "site" {
       origin_protocol_policy = "http-only"
       origin_ssl_protocols   = ["SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2"]
     }
+  }
+
+  origin {
+    origin_id   = local.backend_origin_id
+    domain_name = aws_eip.backend.public_dns
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
+  # Live server status, so never cached.
+  ordered_cache_behavior {
+    path_pattern             = "/api/*"
+    target_origin_id         = local.backend_origin_id
+    viewer_protocol_policy   = "redirect-to-https"
+    allowed_methods          = ["GET", "HEAD"]
+    cached_methods           = ["GET", "HEAD"]
+    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_disabled.id
+    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer_except_host.id
+    compress                 = true
   }
 
   default_cache_behavior {

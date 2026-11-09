@@ -80,3 +80,13 @@ resource "aws_vpc_security_group_egress_rule" "all" {
   cidr_ipv4         = "0.0.0.0/0"
 }
 
+
+# Fixed public address so CloudFront has a stable origin to forward /api to.
+resource "aws_eip" "backend" {
+  domain   = "vpc"
+  instance = aws_instance.backend.id
+
+  tags = {
+    Name = "zendcraft-backend"
+  }
+}
