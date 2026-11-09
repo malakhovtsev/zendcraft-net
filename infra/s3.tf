@@ -39,17 +39,3 @@ resource "aws_s3_bucket_policy" "site" {
     }]
   })
 }
-
-# Empty leftover that redirects to www; nothing points at it.
-resource "aws_s3_bucket" "apex_redirect" {
-  bucket = "zendcraft.net"
-}
-
-resource "aws_s3_bucket_website_configuration" "apex_redirect" {
-  bucket = aws_s3_bucket.apex_redirect.id
-
-  redirect_all_requests_to {
-    host_name = "www.zendcraft.net"
-    protocol  = "https"
-  }
-}

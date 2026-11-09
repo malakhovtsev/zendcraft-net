@@ -44,6 +44,11 @@ resource "aws_cloudfront_distribution" "site" {
     cached_methods         = ["GET", "HEAD"]
     cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
     compress               = true
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.redirect_www_to_apex.arn
+    }
   }
 
   restrictions {
@@ -59,27 +64,32 @@ resource "aws_cloudfront_distribution" "site" {
   }
 }
 
-# Leftover from an earlier attempt; redirects the wrong way and is attached to nothing.
-resource "aws_cloudfront_function" "redirect_to_www" {
-  name    = "RedirectToWWW"
+# zendcraft.net is the canonical address; www keeps working by redirecting
+# there with the same path and query string.
+resource "aws_cloudfront_function" "redirect_www_to_apex" {
+  name    = "redirect-www-to-apex"
   runtime = "cloudfront-js-2.0"
-  publish = false
+  publish = true
   code    = <<-EOT
     function handler(event) {
       var request = event.request;
-      var headers = request.headers;
-
-      if (headers.host && headers.host.value === 'zendcraft.net') {
-        return {
-          statusCode: 301,
-          statusDescription: 'Moved Permanently',
-          headers: {
-            location: { value: 'https://www.zendcraft.net' }
-          }
-        };
+      if (request.headers.host.value !== 'www.zendcraft.net') {
+        return request;
       }
 
-      return request;
+      var query = Object.keys(request.querystring).map(function (key) {
+        var param = request.querystring[key];
+        var values = param.multiValue ? param.multiValue : [param];
+        return values.map(function (v) { return key + '=' + v.value; }).join('&');
+      }).join('&');
+
+      return {
+        statusCode: 301,
+        statusDescription: 'Moved Permanently',
+        headers: {
+          location: { value: 'https://zendcraft.net' + request.uri + (query ? '?' + query : '') }
+        }
+      };
     }
   EOT
 }
