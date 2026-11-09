@@ -61,6 +61,25 @@ data "aws_iam_policy_document" "github_deploy" {
   }
 
   statement {
+    sid       = "LogInToRegistry"
+    actions   = ["ecr:GetAuthorizationToken"]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "PushApiImage"
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:InitiateLayerUpload",
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload",
+      "ecr:PutImage",
+      "ecr:BatchGetImage",
+    ]
+    resources = [aws_ecr_repository.api.arn]
+  }
+
+  statement {
     sid       = "UploadBackendBuild"
     actions   = ["s3:PutObject"]
     resources = ["${aws_s3_bucket.deploy_artifacts.arn}/backend/*"]
@@ -115,7 +134,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "deploy_artifacts" {
   }
 }
 
-# Lets the backend instance download the builds that CI uploads.
+# Lets the backend instance download the release bundles that CI uploads.
 data "aws_iam_policy_document" "backend_read_artifacts" {
   statement {
     actions   = ["s3:GetObject"]
