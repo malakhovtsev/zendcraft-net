@@ -60,3 +60,9 @@ cd backend && npm install && npm run dev
 # Site on http://localhost:3000 (/api is proxied to the backend)
 cd frontend && npm install && npm run dev
 ```
+
+## License
+
+Copyright © 2025–2026 Andrii Malakhovtsev. All rights reserved. The source is public for viewing and reference only; see [LICENSE](LICENSE).
+
+Not affiliated with Mojang or Microsoft. Minecraft is a trademark of Mojang AB.
