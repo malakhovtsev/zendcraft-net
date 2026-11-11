@@ -14,6 +14,11 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist ./dist
 
+# On Lambda, the adapter turns invocations into HTTP requests to the app.
+# Anywhere else it's never started, so the image still runs as a plain server.
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:1.1.0 /lambda-adapter /opt/extensions/lambda-adapter
+ENV AWS_LWA_PORT=3000
+
 USER node
 EXPOSE 3000
 
