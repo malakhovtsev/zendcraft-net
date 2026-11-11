@@ -3,3 +3,6 @@
 *.tfstate.*
 crash.log
 *.tfplan
+
+# Local values that stay out of git (e.g. the game server address).
+*.tfvars
