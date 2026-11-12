@@ -75,29 +75,15 @@ data "aws_iam_policy_document" "github_deploy" {
       "ecr:CompleteLayerUpload",
       "ecr:PutImage",
       "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
     ]
     resources = [aws_ecr_repository.api.arn]
   }
 
   statement {
-    sid       = "UploadBackendBuild"
-    actions   = ["s3:PutObject"]
-    resources = ["${aws_s3_bucket.deploy_artifacts.arn}/backend/*"]
-  }
-
-  statement {
-    sid     = "RunBackendDeployScript"
-    actions = ["ssm:SendCommand"]
-    resources = [
-      aws_ssm_document.deploy_backend.arn,
-      aws_instance.backend.arn,
-    ]
-  }
-
-  statement {
-    sid       = "ReadDeployResult"
-    actions   = ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations"]
-    resources = ["*"]
+    sid       = "UpdateApiFunction"
+    actions   = ["lambda:UpdateFunctionCode", "lambda:GetFunction"]
+    resources = [aws_lambda_function.api.arn]
   }
 }
 

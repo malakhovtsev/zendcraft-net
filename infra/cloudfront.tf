@@ -13,8 +13,8 @@ data "aws_cloudfront_cache_policy" "caching_disabled" {
   name = "Managed-CachingDisabled"
 }
 
-# Forwards query strings and viewer headers, but not Host, so nginx sees the
-# origin's own hostname instead of zendcraft.net.
+# Forwards query strings and viewer headers, but not Host: the function URL
+# only answers to its own hostname, and the request is signed for it.
 data "aws_cloudfront_origin_request_policy" "all_viewer_except_host" {
   name = "Managed-AllViewerExceptHostHeader"
 }
@@ -48,14 +48,17 @@ resource "aws_cloudfront_distribution" "site" {
     }
   }
 
+  # The API function URL. Origin Access Control signs every request, and the
+  # URL rejects anything unsigned.
   origin {
-    origin_id   = local.backend_origin_id
-    domain_name = aws_eip.backend.public_dns
+    origin_id                = local.backend_origin_id
+    domain_name              = trimsuffix(trimprefix(aws_lambda_function_url.api.function_url, "https://"), "/")
+    origin_access_control_id = aws_cloudfront_origin_access_control.api.id
 
     custom_origin_config {
       http_port              = 80
       https_port             = 443
-      origin_protocol_policy = "http-only"
+      origin_protocol_policy = "https-only"
       origin_ssl_protocols   = ["TLSv1.2"]
     }
   }
